@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Population Growth Chart</title>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</head>
+<body>
+    <h1 style="text-align:center; color:brown">Graph Of Growing Population</h1><br>
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+    <br><br>
+    <label for="startYear">Start Year:</label>
+    <input type="number" id="startYear" name="startYear" value="0">
+    <label for="endYear">End Year:</label>
+    <input type="number" id="endYear" name="endYear" value="0">
+     <button id="applyCheck">Check Population</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+    <label for="chooseCity">Choose City: </label> 
+    <input type="text" id="chooseCity" name="chooseCity">
+    <button id="applyCity">Check Graph </button>
+    
+    <script>
+        window.onload = function() {
+            var chart = new CanvasJS.Chart("chartContainer", {
+                backgroundColor: "#eccaa0",
+                animationEnabled: true, 
+                animationDuration: 2000,
+                title: {
+                    text: "Population Growth",
+                    fontColor: "red",
+                    fontSize: 30,
+                    padding: 10,
+                    margin: 25,
+                    backgroundColor: "lightblue",
+                    borderThickness: 1,
+                    cornerRadius: 5,
+                    verticalAlign: "top",
+                    horizontalAlign: "center"
+                },
+                subtitles: [{
+                    text: "City wise",		
+                    fontColor: "green",
+                    margin: 25,
+                }],
+                exportFileName: "Line Chart", 
+                exportEnabled: true,
+                axisY: {
+                    includeZero: false,
+                    title: "Population",
+                    gridColor: "skyblue",
+                    gridThickness: 2,
+                    titleFontColor: "brown"
+                },
+                axisX: {
+                    interval: 10,
+                    title: "Year",
+                    titleFontColor: "brown",
+                    gridColor: "lightblue",
+                    gridThickness: 2,
+                    crosshair: {
+                        enabled: true
+                    }
+                },
+                data: [] 
+            });
+        
+            var url = "https://mocki.io/v1/75b3c22e-7091-4187-9fa4-51f8f98cb565"; 
+        
+            fetch(url)
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log("Data fetched:", data); 
+                    if (data.cities && Array.isArray(data.cities)) {
+                        data.cities.forEach(function(city) {
+                            var dataPoints = city.population.map(function(item) {
+                                return { label: item.year.toString(), y: item.population };
+                            });
+                            chart.options.data.push({
+                                type: "line",
+                                name: city.name,
+                                showInLegend: true,
+                                dataPoints: dataPoints,
+                                markerType: "triangle",
+                            });
+                        });
+                        chart.render();
+
+                        document.getElementById("applyCheck").addEventListener("click", function() {
+                            applyCheck(data.cities);
+                        });
+                    } 
+                })
+                .catch(function(error) {
+                    console.error("Fetch error:", error);
+                });
+                
+            function applyCheck(cities) {
+                var startYear = Number(document.getElementById("startYear").value);
+                var endYear = Number(document.getElementById("endYear").value);
+                console.log("Start Year:", startYear);
+                console.log("End Year:", endYear);
+
+                chart.options.data = [];
+
+                cities.forEach(function(city) {
+                    var filteredPoints = city.population.filter(function(item) {
+                        return item.year >= startYear && item.year <= endYear;
+                    }).map(function(item) {
+                        return { label: item.year.toString(), y: item.population };
+                    });
+
+                    chart.options.data.push({
+                        type: "line",
+                        name: city.name,
+                        showInLegend: true,
+                        dataPoints: filteredPoints,
+                        markerType: "triangle",
+                    });
+                });
+
+                console.log("Filtered Data:", chart.options.data);
+                chart.render();
+            }
+
+            function applyCity(city){
+                var chooseCity = document.getElementById("chooseCity").value;
+                console.log("Choose Year:", chooseCity);
+
+                chart.options.data = [];
+
+                city.forEach(function(cityy){
+                    var filteredData = cityy.cities.filter(function(item){
+                        return item.cities
+                    })
+                })
+            }
+        };
+    </script>
+</body>
+</html>
